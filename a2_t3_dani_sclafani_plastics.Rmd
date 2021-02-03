@@ -9,6 +9,7 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
 library(janitor)
+library(patchwork)
 ```
 
 #### reading in data from package
@@ -33,8 +34,10 @@ usa <- plastics %>%
 ```
 
 ```{r}
-sum_country <- plastics %>% 
+sum20_country <- plastics %>% 
   clean_names() %>% 
+  filter(country != "EMPTY") %>%
+  filter(year == "2020") %>% 
   mutate(pet = as.numeric(pet)) %>% 
   mutate(grand_total = as.numeric(grand_total)) %>% 
   mutate(hdpe =as.numeric(hdpe)) %>% 
@@ -43,14 +46,56 @@ sum_country <- plastics %>%
   mutate(ps =as.numeric(ps)) %>% 
   mutate(pvc =as.numeric(pvc)) %>% 
   drop_na(grand_total) %>% 
-  group_by(year, country) %>% 
-  summarize(total_plastic = sum(grand_total))
+  group_by(country) %>% 
+  summarize(total_plastic = sum(grand_total)) %>% 
+  slice_max(total_plastic, n =10)
 ```
 
 ```{r}
-ggplot(data = sum_country, aes(x = fct_reorder(country,total_plastic), y = total_plastic)) +
-  geom_col()+
-  facet_wrap(~year)
+sum19_country <- plastics %>% 
+  clean_names() %>% 
+  filter(country != "EMPTY") %>%
+  filter(year == "2019") %>% 
+  mutate(pet = as.numeric(pet)) %>% 
+  mutate(grand_total = as.numeric(grand_total)) %>% 
+  mutate(hdpe =as.numeric(hdpe)) %>% 
+  mutate(ldpe =as.numeric(ldpe)) %>% 
+  mutate(pp =as.numeric(pp)) %>% 
+  mutate(ps =as.numeric(ps)) %>% 
+  mutate(pvc =as.numeric(pvc)) %>% 
+  drop_na(grand_total) %>% 
+  group_by(country) %>% 
+  summarize(total_plastic = sum(grand_total)) %>% 
+  slice_max(total_plastic, n =10)
 ```
+```
+
+
+```{r}
+g2020 <- ggplot(data = sum20_country, aes(x = fct_reorder(country, total_plastic), y = total_plastic)) +
+  geom_col()+
+  theme(axis.text.x = element_text(angle = 60, hjust = 1))
+  
+g2020
+```
+
+
+
+```{r}
+g2019<- ggplot(data = sum19_country, aes(x = fct_reorder(country, total_plastic), y = total_plastic)) +
+  geom_col()+
+  theme(axis.text.x = element_text(angle = 60, hjust = 1))
+  
+g2019
+```
+
+
+```{r}
+graph <- g2019 | g2020
+
+graph
+```
+
+
 
 
