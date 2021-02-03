@@ -1,0 +1,56 @@
+---
+title: "a2_t3_dani_sclafani"
+author: "Danielle Sclafani"
+date: "2/2/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(janitor)
+```
+
+#### reading in data from package
+```{r}
+tuesdata <- tidytuesdayR::tt_load('2021-01-26')
+tuesdata <- tidytuesdayR::tt_load(2021, week = 5)
+plastics <- tuesdata$plastics
+```
+
+### data wrangling
+
+```{r}
+starbs <- plastics %>% 
+  filter(parent_company == "Starbucks") %>% 
+  select(year, grand_total, year, country, pet)
+```
+
+
+```{r}
+usa <- plastics %>% 
+  filter(country == "United States of America")
+```
+
+```{r}
+sum_country <- plastics %>% 
+  clean_names() %>% 
+  mutate(pet = as.numeric(pet)) %>% 
+  mutate(grand_total = as.numeric(grand_total)) %>% 
+  mutate(hdpe =as.numeric(hdpe)) %>% 
+  mutate(ldpe =as.numeric(ldpe)) %>% 
+  mutate(pp =as.numeric(pp)) %>% 
+  mutate(ps =as.numeric(ps)) %>% 
+  mutate(pvc =as.numeric(pvc)) %>% 
+  drop_na(grand_total) %>% 
+  group_by(year, country) %>% 
+  summarize(total_plastic = sum(grand_total))
+```
+
+```{r}
+ggplot(data = sum_country, aes(x = fct_reorder(country,total_plastic), y = total_plastic)) +
+  geom_col()+
+  facet_wrap(~year)
+```
+
+
